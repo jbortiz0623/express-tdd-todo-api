@@ -32,65 +32,79 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-
 /*
- * JSON API Endpoints
- *
- * The comments below give you an idea of the expected functionality
- * that you need to build. These are basic descriptions, for more
- * specifications, see the todosTest.js file and the outputs of running
- * the tests to see the exact details. BUILD THE FUNCTIONALITY IN THE
- * ORDER THAT THE TESTS DICTATE.
+ * Response Endpoints
  */
 
-// Search
+// Search //
 app.get('/api/todos/search', (req, res) => {
-  /* This endpoint responds with the search results from the
-   * query in the request. COMPLETE THIS ENDPOINT LAST.
-   */
+  // save the query to a variable
+  let searchTerm = req.query.q;
+  // filter the todos array based on the query and save to a variable
+  let filteredTodos = todos.filter((todo) => {
+    return(
+      todo.task.toLowerCase().includes(searchTerm.toLowerCase()) || todo.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  });
+  // send the filtered array as a json response
+  res.json({data : filteredTodos});
 });
 
-// Index
+// Index //
 app.get('/api/todos', (req, res) => {
-  /* This endpoint responds with all of the todos
-   */
+  //send the todos array as a json response
+  res.json({data:todos});
+});
+
+
+// Show //
+app.get('/api/todos/:id', (req, res) => {
+  // grab the param and save it to a variable
+ let paramId = parseInt(req.params.id)
+ // get the index of the todo with the paramId and save it to a variable
+ let index = todos.findIndex(todo => todo._id == paramId)
+ // send a json response of todo with the given index
+ res.json(todos[index])
+});
+
+// Update //
+app.put('/api/todos/:id', (req, res) => {
+  // grab the param and save it to a variable
+  let paramId = parseInt(req.params.id)
+  // get the index of the todo with the paramId and save it to a variable
+  let index = todos.findIndex(todo => todo._id == paramId)
+  // with that given index access the todo and update it with the given information from req.body
+  todos[index].description = req.body.description
+  todos[index].task = req.body.task
+  // respond with the updated todo
+  res.json(todos[index])
 });
 
 // Create
 app.post('/api/todos', (req, res) => {
-  /* This endpoint will add a todo to our "database"
-   * and respond with the newly created todo.
-   */
-});
-
-// Show
-app.get('/api/todos/:id', (req, res) => {
-  /* This endpoint will return a single todo with the
-   * id specified in the route parameter (:id)
-   */
-});
-
-// Update
-app.put('/api/todos/:id', (req, res) => {
-  /* This endpoint will update a single todo with the
-   * id specified in the route parameter (:id) and respond
-   * with the newly updated todo.
-   */
+  //save the req.body object as a variable
+  newTodo = req.body
+  //add an _id key that is the length + 1 according to the testing
+  newTodo._id = todos.length + 1
+  // put the new todo in the todos array
+  todos.push(newTodo);
+  // respond with the new todo
+  res.json(newTodo);
 });
 
 // Destroy
 app.delete('/api/todos/:id', (req, res) => {
-  /* This endpoint will delete a single todo with the
-   * id specified in the route parameter (:id) and respond
-   * with success.
-   */
+  // grab the param and save it to a variable
+  let paramId = parseInt(req.params.id)
+  // get the index of the todo with the paramId and save it to a variable
+  let index = todos.findIndex(todo => todo._id == paramId)
+  // remove that index from the array
+  todos.splice(index,1)
+  // respond with a success
+  res.json(`success removed`)
 });
 
-/**********
- * SERVER *
- **********/
-
-// listen on port 3000
+//Run server and run on port 3000
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');
 });
